@@ -20,7 +20,7 @@ defmodule Eventizer.MixProject do
 
   defp deps do
     [
-      {:mox, "~> 0.3", only: :test},
+      {:mox, "~> 0.3", only: :test}
     ]
   end
 end

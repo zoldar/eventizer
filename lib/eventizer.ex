@@ -11,16 +11,22 @@ defmodule Eventizer do
   end
 
   def publish(topic, event) do
-    :ok = Registry.dispatch(Eventizer.Dispatcher, topic, fn entries ->
-      for {_pid, {module, function}} <- entries do
-        try do
-          apply(module, function, [event])
-        catch
-          kind, reason ->
-            formatted = Exception.format(kind, reason, System.stacktrace())
-            Logger.error "Eventizer dispatch failed for topic #{inspect topic}, handler #{inspect {module, function}} end event #{inspect event} with #{formatted}"
+    :ok =
+      Registry.dispatch(Eventizer.Dispatcher, topic, fn entries ->
+        for {_pid, {module, function}} <- entries do
+          try do
+            apply(module, function, [event])
+          catch
+            kind, reason ->
+              formatted = Exception.format(kind, reason, System.stacktrace())
+
+              Logger.error(
+                "Eventizer dispatch failed for topic #{inspect(topic)}, handler #{
+                  inspect({module, function})
+                } end event #{inspect(event)} with #{formatted}"
+              )
+          end
         end
-      end
-    end)
+      end)
   end
 end

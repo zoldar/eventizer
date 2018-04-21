@@ -13,7 +13,8 @@ defmodule EventizerTest do
 
   test "publish publishes the event payload" do
     expect(Eventizer.HandlerMock, :handle, fn event ->
-      assert event == %{some: :event} end)
+      assert event == %{some: :event}
+    end)
 
     assert :ok = Eventizer.subscribe(:foo, {Eventizer.HandlerMock, :handle})
     assert :ok = Eventizer.publish(:foo, %{some: :event})
