@@ -6,6 +6,16 @@ defmodule EventizerTest do
 
   setup :verify_on_exit!
 
+  defmodule MacroHandlerMock do
+    use Eventizer
+
+    @event_handler {:bar, :handle}
+
+    def handle(%{pid: pid} = event) do
+      send pid, event
+    end
+  end
+
   test "subscribe registers a handler" do
     assert :ok = Eventizer.subscribe(:foo, {IO, :inspect})
     assert [{_, {IO, :inspect}}] = Registry.lookup(Eventizer.Dispatcher, :foo)
@@ -18,5 +28,11 @@ defmodule EventizerTest do
 
     assert :ok = Eventizer.subscribe(:foo, {Eventizer.HandlerMock, :handle})
     assert :ok = Eventizer.publish(:foo, %{some: :event})
+  end
+
+  test "publish publishes event for macro subscribed handler" do
+    Eventizer.load_handlers([MacroHandlerMock])
+    assert :ok = Eventizer.publish(:bar, %{some: :event, pid: self()})
+    assert_receive %{some: :event}
   end
 end
